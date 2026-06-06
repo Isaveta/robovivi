@@ -73,41 +73,14 @@ const TestModal = ({ openedTask, onClose }) => {
                         </div>
                     </div>
                 ) : (
-                    <div className="flex flex-col items-center justify-center w-full h-full gap-4 p-4 text-center">
-                        {
-
-                        }
-                        <div className="flex items-center justify-center w-full" style={{ height: '300px' }}>
-                            <img
-                                src={isPassed ? "/assets/happy-vivi.PNG" : "/assets/sad-vivi.PNG"}
-                                alt="Результат"
-                                style={{
-                                    maxHeight: '100%',
-                                    maxWidth: '100%',
-                                    objectFit: 'contain',
-                                    transform: 'scale(1.2)'
-                                }}
-                                className="drop-shadow-[0_0_25px_rgba(34,211,238,0.6)] animate-in zoom-in duration-500"
-                            />
-                        </div>
-                        {
-
-                        }
-                        <div className="flex flex-col items-center gap-2 w-full">
-                            <h2 className="text-4xl font-black text-white tracking-widest uppercase">
-                                {isPassed ? "ВІТАЄМО!" : "СПРОБУЙ ЩЕ РАЗ"}
-                            </h2>
-                            <p className="text-xl text-cyan-300 font-bold">
-                                Твій результат: {score} з {rawData.length} ({Math.round(percentage)}%)
-                            </p>
-                        </div>
-
-                        <button
-                            onClick={onClose}
-                            className="mt-4 px-12 py-4 bg-gradient-to-r from-cyan-600 to-blue-600 rounded-2xl font-bold text-lg hover:scale-105 transition-all"
-                        >
-                            ЗАКРИТИ
-                        </button>
+                    <div className="flex flex-col items-center justify-center gap-6 text-center h-full">
+                        <img src={isPassed ? "/assets/happy-vivi.PNG" : "/assets/sad-vivi.PNG"} alt="Результат"
+                             className="w-72 h-72 object-contain drop-shadow-[0_0_25px_rgba(34,211,238,0.6)] animate-in zoom-in duration-500" />
+                        <h2 className="text-4xl font-black text-white tracking-widest uppercase">
+                            {isPassed ? "ВІТАЄМО!" : "СПРОБУЙ ЩЕ РАЗ"}
+                        </h2>
+                        <p className="text-xl text-cyan-300 font-bold">Твій результат: {score} з {rawData.length} ({Math.round(percentage)}%)</p>
+                        <button onClick={onClose} className="px-12 py-4 bg-gradient-to-r from-cyan-600 to-blue-600 rounded-2xl font-bold text-lg hover:scale-105 transition-all">ЗАКРИТИ</button>
                     </div>
                 )}
             </div>
