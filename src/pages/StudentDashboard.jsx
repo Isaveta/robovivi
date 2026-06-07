@@ -3,11 +3,19 @@ import { useNavigate } from 'react-router-dom';
 import { missions, viviQuotes } from '../data/missionsData.jsx';
 import TheoryModal from '../components/TheoryModal.jsx';
 import TestModal from '../components/TestModal.jsx';
+import RobotModel from '../components/RobotModel.jsx';
 
 const StudentDashboard = () => {
     const navigate = useNavigate();
     const [viviText, setViviText] = useState(viviQuotes[0]);
     const [openedTask, setOpenedTask] = useState(null);
+    const [robotIndex, setRobotIndex] = useState(0);
+    const [showInfo, setShowInfo] = useState(false);
+
+    const robotsData = [
+        { name: "Пересувний робот", scene: "https://prod.spline.design/PYdYImPRm4qT48eo/scene.splinecode" , info: "Технічний факт: На відміну від колісних роботів, багатоніжкові системи використовують складні алгоритми розподілу ваги. Це дозволяє їм зберігати стабільність навіть при пошкодженні кінцівки — це називається відмовостійкістю конструкції." },
+        { name: "Промисловий робот", scene: "https://prod.spline.design/j8pfhOzOwm3ha9dF/scene.splinecode" ,  info: "Технічний факт: Промислові маніпулятори працюють з точністю до мікрон. Їхнє керування базується на зворотній кінематиці — математичній моделі, що дозволяє роботу миттєво обчислювати траєкторію інструмента в 3D-просторі."},
+    ];
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -100,10 +108,42 @@ const StudentDashboard = () => {
 
                 <div className="flex-[2] flex flex-col gap-6">
                     <div className="flex-[3] bg-slate-950/70 backdrop-blur-md border border-cyan-500/40 rounded-3xl p-6 shadow-[inset_0_0_20px_rgba(34,211,238,0.1)] flex flex-col relative overflow-hidden">
-                        <div className="absolute top-0 left-0 w-16 h-16 border-t-2 border-l-2 border-cyan-400 rounded-tl-3xl opacity-50"></div>
-                        <h3 className="text-cyan-400 font-bold mb-4 tracking-widest text-sm">3D МОДЕЛІ</h3>
-                        <div className="flex-1 border border-cyan-500/20 rounded-xl bg-slate-900/50 flex items-center justify-center">
-                            <span className="text-slate-600 text-sm">Тут буде вбудована сцена зі Spline</span>
+
+                        {/* Заголовок із кнопкою I */}
+                        <div className="flex justify-between items-center mb-4">
+                            <div className="flex items-center gap-3">
+                                <h3 className="text-cyan-400 font-bold tracking-widest text-sm uppercase">3D МОДЕЛІ</h3>
+                                <button
+                                    onClick={() => setShowInfo(!showInfo)}
+                                    className="group relative flex items-center justify-center w-6 h-6 rounded-full bg-cyan-500/20 border border-cyan-400 text-cyan-300 hover:bg-cyan-500 hover:text-white transition-all shadow-[0_0_8px_rgba(34,211,238,0.4)] animate-pulse"
+                                >
+                                    <span className="font-bold text-xs">i</span>
+                                    <span className="absolute -top-8 left-0 bg-slate-800 text-[10px] text-white px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap border border-cyan-500/30 pointer-events-none">
+                    Дізнатись про робота
+                </span>
+                                </button>
+                            </div>
+
+                            {/* Кнопки перемикання */}
+                            <div className="flex items-center gap-3">
+                                <button onClick={() => {setRobotIndex(prev => prev === 0 ? 1 : 0); setShowInfo(false)}} className="text-cyan-400 hover:text-white text-xl font-bold">←</button>
+                                <span className="text-cyan-200 text-xs font-bold w-32 text-center">{robotsData[robotIndex].name}</span>
+                                <button onClick={() => {setRobotIndex(prev => prev === 0 ? 1 : 0); setShowInfo(false)}} className="text-cyan-400 hover:text-white text-xl font-bold">→</button>
+                            </div>
+                        </div>
+
+                        {/* Вікно моделі + Інфо блок */}
+                        <div className="flex-1 w-full border border-cyan-500/20 rounded-xl bg-slate-900/50 flex items-center justify-center overflow-hidden relative">
+                            <RobotModel scene={robotsData[robotIndex].scene} />
+
+                            {/* Інфо блок, що з'являється поверх */}
+                            {showInfo && (
+                                <div className="absolute inset-0 z-20 bg-slate-950/95 p-6 flex flex-col justify-center items-center text-center animate-in fade-in duration-300">
+                                    <h4 className="text-cyan-400 font-bold mb-3">{robotsData[robotIndex].name}</h4>
+                                    <p className="text-slate-300 text-xs leading-relaxed max-w-xs">{robotsData[robotIndex].info}</p>
+                                    <button onClick={() => setShowInfo(false)} className="mt-6 px-4 py-1 border border-cyan-500 rounded text-cyan-400 text-xs hover:bg-cyan-900">Зрозуміло</button>
+                                </div>
+                            )}
                         </div>
                     </div>
 
