@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 import { useState } from 'react';
 
 // Створюємо масив етапів прямо тут або в окремому файлі даних
@@ -53,5 +54,7 @@ const CyberShield = ({ onClose }) => {
     );
 };
 
+=======
+>>>>>>> parent of 62bd2e1 (Practice System & UI Polish)
 =======
 >>>>>>> parent of 62bd2e1 (Practice System & UI Polish)
