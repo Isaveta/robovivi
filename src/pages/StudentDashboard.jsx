@@ -4,6 +4,7 @@ import { missions, viviQuotes } from '../data/missionsData.jsx';
 import TheoryModal from '../components/TheoryModal.jsx';
 import TestModal from '../components/TestModal.jsx';
 import RobotModel from '../components/RobotModel.jsx';
+import PracticeManager from '../components/practice/PracticeManager';
 
 const StudentDashboard = () => {
     const navigate = useNavigate();
@@ -31,7 +32,7 @@ const StudentDashboard = () => {
             : 'bg-slate-700/50';
     };
 
-    const renderDiamond = (type, status, missionTitle) => {
+    const renderDiamond = (type, status, missionTitle, mission) => {
         let borderColor, bgColor, shadow;
         if (status === 'completed') {
             borderColor = 'border-cyan-400'; bgColor = 'bg-cyan-950/80'; shadow = 'shadow-[0_0_20px_rgba(34,211,238,0.3)]';
