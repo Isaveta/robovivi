@@ -6,9 +6,7 @@ const RoleSelection = () => {
     return (
         <div className="w-full min-h-screen flex flex-col items-center justify-center bg-cover bg-center p-4" style={{ backgroundImage: "url('/assets/clean-bg.PNG')" }}>
 
-            {
-
-            }
+            {/* Головний заголовок екрану */}
             <div className="text-center mb-12 flex flex-col items-center">
                 <div className="w-20 h-20 mb-6 border-2 border-cyan-400 rounded-2xl rotate-45 flex items-center justify-center shadow-[0_0_20px_rgba(34,211,238,0.3)] bg-slate-900/80">
                     <span className="text-4xl -rotate-45">🐱</span>

@@ -4,7 +4,6 @@ import { missions, viviQuotes } from '../data/missionsData.jsx';
 import TheoryModal from '../components/TheoryModal.jsx';
 import TestModal from '../components/TestModal.jsx';
 import RobotModel from '../components/RobotModel.jsx';
-import PracticeManager from '../components/practice/PracticeManager';
 
 const StudentDashboard = () => {
     const navigate = useNavigate();
@@ -32,7 +31,7 @@ const StudentDashboard = () => {
             : 'bg-slate-700/50';
     };
 
-    const renderDiamond = (type, status, missionTitle, mission) => {
+    const renderDiamond = (type, status, missionTitle) => {
         let borderColor, bgColor, shadow;
         if (status === 'completed') {
             borderColor = 'border-cyan-400'; bgColor = 'bg-cyan-950/80'; shadow = 'shadow-[0_0_20px_rgba(34,211,238,0.3)]';
@@ -46,11 +45,7 @@ const StudentDashboard = () => {
 
         return (
             <div
-                onClick={() => setOpenedTask({
-                    mission: missionTitle,
-                    type: type,
-                    missionId: mission.id // Припускаю, що в об'єкті mission є поле id
-                })}
+                onClick={() => setOpenedTask({ mission: missionTitle, type: type })}
                 className={`w-16 h-16 flex items-center justify-center rotate-45 border-2 rounded-xl transition-all ${borderColor} ${bgColor} ${shadow} hover:scale-110 cursor-pointer`}
             >
                 <div className="-rotate-45 flex items-center justify-center pointer-events-none">{content}</div>
@@ -93,16 +88,12 @@ const StudentDashboard = () => {
                                     <span className="text-[11px] opacity-80 mt-0.5 leading-tight">{mission.subtitle}</span>
                                 </div>
                                 <div className={`flex-1 h-[2px] ${getLineClass(mission.theory)}`}></div>
-                                {renderDiamond('theory', mission.theory, `${mission.label}: ${mission.title}`, mission)}
-
+                                {renderDiamond('theory', mission.theory, `${mission.label}: ${mission.title}`)}
                                 <div className={`flex-1 h-[2px] ${getLineClass(mission.test)}`}></div>
-                                {renderDiamond('test', mission.test, `${mission.label}: ${mission.title}`, mission)}
-
+                                {renderDiamond('test', mission.test, `${mission.label}: ${mission.title}`)}
                                 <div className={`flex-1 h-[2px] ${getLineClass(mission.practice)}`}></div>
-                                {renderDiamond('practice', mission.practice, `${mission.label}: ${mission.title}`, mission)}
-
+                                {renderDiamond('practice', mission.practice, `${mission.label}: ${mission.title}`)}
                                 <div className={`flex-1 h-[2px] ${getLineClass(mission.globalStatus)}`}></div>
-
                                 <div className="w-28 flex justify-end">
                                     {mission.globalStatus === 'completed' && <span className="px-3 py-1 rounded-full border border-cyan-400 text-cyan-300 shadow-[0_0_10px_rgba(34,211,238,0.3)] text-xs font-bold tracking-wider">Завершено</span>}
                                 </div>
@@ -171,7 +162,7 @@ const StudentDashboard = () => {
             {openedTask?.type === 'theory' && <TheoryModal openedTask={openedTask} onClose={() => setOpenedTask(null)} />}
             {openedTask?.type === 'test' && <TestModal openedTask={openedTask} onClose={() => setOpenedTask(null)} />}
 
-            {/* Менеджер практики */}
+            {/* Заглушка для практики */}
             {openedTask?.type === 'practice' && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-6 sm:p-10 bg-slate-950/80 backdrop-blur-sm transition-opacity">
                     <div className="relative w-full max-w-6xl h-[85vh] bg-slate-900 border-2 border-cyan-400 rounded-3xl shadow-[0_0_50px_rgba(34,211,238,0.2)] flex flex-col overflow-hidden">
@@ -179,13 +170,7 @@ const StudentDashboard = () => {
                             <h2 className="text-2xl font-bold text-white">ПРАКТИКА</h2>
                             <button onClick={() => setOpenedTask(null)} className="text-slate-400 hover:text-cyan-400 text-xl">✕</button>
                         </div>
-                        {/* ТУТ ми викликаємо менеджер і передаємо динамічний ID */}
-                        <div className="flex-1 p-8">
-                            <PracticeManager
-                                missionId={openedTask.missionId}
-                                onClose={() => setOpenedTask(null)}
-                            />
-                        </div>
+                        <div className="flex-1 flex items-center justify-center"><p className="text-slate-400">У розробці</p></div>
                     </div>
                 </div>
             )}
