@@ -1,41 +1,54 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+
+// Створюємо масив етапів прямо тут або в окремому файлі даних
+const stages = [
+    { id: 1, question: "URERW", answer: "ROBOT", shift: 3, hint: "АБВГДЕЄЖЗИІЇЙКЛМНОПРСТУФХЦЧШЩЬЮЯ" },
+];
 
 const CyberShield = ({ onClose }) => {
+    const [currentStage, setCurrentStage] = useState(0);
     const [input, setInput] = useState('');
+    const [status, setStatus] = useState('idle'); // idle, correct, wrong
+
+    const checkAnswer = () => {
+        if (input.toUpperCase() === stages[currentStage].answer) {
+            setStatus('correct');
+            setTimeout(() => {
+                if (currentStage < stages.length - 1) {
+                    setCurrentStage(prev => prev + 1);
+                    setInput('');
+                    setStatus('idle');
+                } else {
+                    alert("Місію виконано!");
+                }
+            }, 1000);
+        } else {
+            setStatus('wrong');
+        }
+    };
 
     return (
-        <div className="text-cyan-100 p-6 flex flex-col items-center justify-center font-mono">
-            {/* Декоративний заголовок */}
-            <div className="w-full border-b border-cyan-500/50 pb-4 mb-6 flex justify-between items-center">
-                <h3 className="text-2xl font-bold tracking-widest text-cyan-400 animate-pulse uppercase">
-                    &gt; Взлом_системи.exe
-                </h3>
+        <div className="text-cyan-100 p-6 font-mono">
+            {/* Панель алфавіту */}
+            <div className="bg-slate-900 p-4 mb-4 border border-cyan-500/30 text-[10px] break-all">
+                <span className="text-cyan-400">ALPHABET_MAP: </span>
+                {stages[currentStage].hint}
             </div>
 
-            {/* Контейнер завдання */}
-            <div className="bg-slate-950/50 border border-cyan-800 p-6 rounded-lg w-full max-w-lg shadow-[0_0_15px_rgba(34,211,238,0.1)]">
-                <p className="mb-6 text-sm text-slate-300 border-l-2 border-cyan-500 pl-4">
-                    [SYSTEM WARNING]<br/>
-                    Зловмисник активував шифр Цезаря.<br/>
-                    Кожен символ зміщено на 3 позиції вперед.<br/><br/>
-                    ЗАШИФРОВАНЕ ПОВІДОМЛЕННЯ:<br/>
-                    <span className="text-2xl font-bold text-cyan-300 tracking-tighter">URERW</span>
-                </p>
+            <div className="text-2xl font-bold text-cyan-300">{stages[currentStage].question}</div>
 
-                <input
-                    type="text"
-                    value={input}
-                    onChange={(e) => setInput(e.target.value.toUpperCase())}
-                    className="bg-black border-2 border-cyan-500/50 p-4 w-full text-cyan-200 outline-none focus:border-cyan-400 focus:shadow-[0_0_10px_rgba(34,211,238,0.3)] uppercase transition-all"
-                    placeholder="Введи ключ доступу..."
-                />
+            <input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                className={`w-full mt-4 p-3 bg-black border-2 ${status === 'wrong' ? 'border-red-500' : 'border-cyan-500'} text-white`}
+            />
 
-                <button className="mt-6 w-full py-3 bg-cyan-900 border border-cyan-400 text-cyan-100 font-bold hover:bg-cyan-600 transition-colors uppercase tracking-widest">
-                    Дешифрувати
-                </button>
-            </div>
+            <button onClick={checkAnswer} className="mt-4 w-full py-3 bg-cyan-700 hover:bg-cyan-600">
+                ДЕШИФРУВАТИ
+            </button>
+
+            {status === 'correct' && <div className="text-green-400 mt-2">ACCESS GRANTED</div>}
         </div>
     );
 };
 
-export default CyberShield;
