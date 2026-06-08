@@ -1,11 +1,12 @@
 import CyberShield from './CyberShield';
+import SortConveyor from './SortConveyor';
 
 const PracticeManager = ({ missionId, onClose }) => {
     // Жодних зайвих console.log або тексту тут не повинно бути!
 
     switch (missionId) {
         case 1:
-            return <div className="p-10 text-white text-center">Місія 1: Конвеєр</div>;
+            return <SortConveyor onClose={onClose} />;
         case 2:
             return <div className="p-10 text-white text-center">Місія 2: Лабіринт</div>;
         case 3:
