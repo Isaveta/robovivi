@@ -1,122 +1,164 @@
 import { useState } from 'react';
 
-const SortConveyor = () => {
-    const [step, setStep] = useState('intro');
-    const [found, setFound] = useState([]);
+const MazeMission = () => {
+    const [mazeMap] = useState([
+        [3, 0, 1, 0, 0, 0, 0, 0],
+        [0, 0, 1, 0, 1, 1, 1, 0],
+        [0, 0, 0, 0, 1, 0, 0, 0],
+        [1, 1, 1, 0, 1, 0, 1, 1],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 1, 1, 1, 1, 1, 1, 0],
+        [0, 0, 0, 0, 1, 0, 0, 0],
+        [1, 1, 1, 0, 0, 0, 1, 2]
+    ]);
 
-    const conveyorItems = [
-        { type: 'robot', src: '/assets/practice/m2/obj-micro.PNG' },
-        { type: 'power', src: '/assets/practice/m2/obj-battery.PNG' },
-        { type: 'trash', src: '/assets/practice/m2/obj-apple.PNG' },
-        { type: 'trash', src: '/assets/practice/m2/obj-cup.PNG' },
-        { type: 'robot', src: '/assets/practice/m2/obj-sensor.PNG' },
-        { type: 'power', src: '/assets/practice/m2/obj-accu.PNG' },
-    ];
+    const [robotPos, setRobotPos] = useState({ y: 0, x: 0, dir: 1 });
+    const [commands, setCommands] = useState([]);
+    const [stepCount, setStepCount] = useState(0);
+    const [isRunning, setIsRunning] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [result, setResult] = useState(null);
+    const [showHelp, setShowHelp] = useState(true);
+    const [loopSettings, setLoopSettings] = useState({ action: 'Вперед', count: 2 });
 
-    const [currentItem, setCurrentItem] = useState(conveyorItems[0]);
-    const [score, setScore] = useState(0);
+    const MAX_COMMANDS = 12;
 
-    const violations = [
-        { id: 1, name: 'broken-wire', src: '/assets/practice/m1/broken-wire.PNG' },
-        { id: 2, name: 'coffee', src: '/assets/practice/m1/spilled-coffee.PNG' },
-        { id: 3, name: 'cables', src: '/assets/practice/m1/messy-cables.PNG' },
-        { id: 4, name: 'papers', src: '/assets/practice/m1/paper1.PNG' },
-        { id: 5, name: 'rag', src: '/assets/practice/m1/wet-rag.PNG' },
-    ];
+    const runAlgorithm = () => {
+        setIsRunning(true);
+        setStepCount(0);
+        let expanded = [];
 
-    const handleSort = (selectedType) => {
-        if (selectedType === currentItem.type) {
-            setScore(prev => prev + 1);
-            if (score >= 5) {
-                setStep('complete');
+        commands.forEach(cmd => {
+            if (cmd.type === 'loop') {
+                for(let i = 0; i < cmd.count; i++) expanded.push(cmd.action);
             } else {
-                const randomItem = conveyorItems[Math.floor(Math.random() * conveyorItems.length)];
-                setCurrentItem(randomItem);
+                expanded.push(cmd.type);
             }
-        } else {
-            alert("ПОМИЛКА! Невірний відсік.");
-        }
+        });
+
+        expanded.forEach((action, index) => {
+            setTimeout(() => {
+                setStepCount(prev => prev + 1);
+                let finalY, finalX;
+
+                setRobotPos(prev => {
+                    let { y, x, dir } = prev;
+                    const cmdName = (typeof action === 'object') ? action.type : action;
+
+                    if (cmdName === 'Вперед') {
+                        if (dir === 0 && y > 0 && mazeMap[y-1][x] !== 1) y -= 1;
+                        else if (dir === 1 && x < 7 && mazeMap[y][x+1] !== 1) x += 1;
+                        else if (dir === 2 && y < 7 && mazeMap[y+1][x] !== 1) y += 1;
+                        else if (dir === 3 && x > 0 && mazeMap[y][x-1] !== 1) x -= 1;
+                    } else if (cmdName === 'Поворот') {
+                        dir = (dir + 1) % 4;
+                    }
+                    finalY = y;
+                    finalX = x;
+                    return { y, x, dir };
+                });
+
+                if (index === expanded.length - 1) {
+                    setTimeout(() => checkWinCondition(finalY, finalX), 600);
+                }
+            }, index * 600);
+        });
     };
 
-    if (step === 'intro') {
-        return (
-            <div className="w-full h-full flex flex-col items-center justify-center bg-slate-950 p-10 text-center border border-cyan-500/30 rounded-xl">
-                <h2 className="text-3xl text-cyan-400 font-bold mb-6">МІСІЯ 1: БЕЗПЕКА ПОНАД УСЕ</h2>
-                <p className="text-slate-300 mb-8 max-w-md">Перед запуском конвеєра перевір лабораторію. Знайди 5 порушень, клікаючи на них!</p>
-                <button
-                    onClick={() => setStep('safety')}
-                    className="px-8 py-3 bg-cyan-600 text-white font-bold rounded-lg hover:bg-cyan-500 transition-all"
-                >
-                    ПОЧАТИ ПЕРЕВІРКУ
-                </button>
-            </div>
-        );
-    }
+    const checkWinCondition = (y, x) => {
+        setIsRunning(false);
+        setResult(y === 7 && x === 7 ? 'win' : 'lose');
+    };
+
+    const resetMission = () => {
+        setCommands([]);
+        setRobotPos({ y: 0, x: 0, dir: 1 });
+        setStepCount(0);
+        setResult(null);
+    };
+
+    const getTileImage = (type) => {
+        if (type === 1) return "/assets/practice/m2/tile-wall.PNG";
+        if (type === 2) return "/assets/practice/m2/tile-goal.PNG";
+        if (type === 3) return "/assets/practice/m2/tile-start.PNG";
+        return "/assets/practice/m2/tile-path.PNG";
+    };
 
     return (
-        <div className="w-full h-full p-4 flex flex-col">
-            {step === 'safety' ? (
-                <div className="relative w-full h-full bg-slate-900 border border-cyan-500/30 rounded-xl overflow-hidden pointer-events-none">
-                    <img src="/assets/practice/m1/bg-lab.PNG" className="absolute inset-0 w-full h-full object-cover pointer-events-none" alt="lab" />
-                    {violations.map((v) => (
-                        !found.includes(v.id) && (
-                            <img
-                                key={v.id}
-                                src={v.src}
-                                className="absolute inset-0 w-full h-full object-cover cursor-pointer pointer-events-auto z-10"
-                                alt={v.name}
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    const newFound = [...found, v.id];
-                                    setFound(newFound);
-                                    if (newFound.length === violations.length) {
-                                        setTimeout(() => setStep('conveyor'), 500);
-                                    }
-                                }}
-                            />
-                        )
-                    ))}
-                    <div className="absolute top-4 left-4 bg-black/60 p-2 text-cyan-400 text-sm font-mono border border-cyan-500/30 rounded z-20 pointer-events-auto">
-                        Порушень знайдено: {found.length} / {violations.length}
-                    </div>
+        <div className="flex gap-8 p-6 bg-slate-950 rounded-xl border border-cyan-500/30 relative">
+            {showHelp && (
+                <div className="absolute inset-0 bg-black/90 flex flex-col items-center justify-center rounded-xl z-50 p-10 text-center">
+                    <h2 className="text-3xl text-cyan-400 font-bold mb-4">Як грати?</h2>
+                    <p className="text-white text-lg mb-6">Допоможи роботу дійти до бази за 12 кроків.</p>
+                    <button onClick={() => setShowHelp(false)} className="px-8 py-3 bg-cyan-600 text-white rounded-lg">Почати!</button>
                 </div>
-            ) : step === 'conveyor' ? (
-                <div className="w-full h-full flex flex-col bg-slate-900 rounded-xl border border-cyan-500/30 p-4 relative">
-                    <h2 className="text-cyan-400 font-bold mb-1 uppercase tracking-widest">Етап 2: Сортувальний конвеєр</h2>
-                    <p className="text-cyan-600 text-xs mb-3 italic">* Натисни на категорію, щоб відсортувати об'єкт!</p>
+            )}
 
-                    <div className="flex-1 relative bg-slate-800 rounded-lg overflow-hidden border border-cyan-500/20">
-                        <img src="/assets/practice/m2/bg-conveyor.PNG" className="absolute w-full h-full object-cover" alt="conveyor" />
-                        <div key={currentItem.src} className="absolute top-[35%] left-0 w-32 h-32 animate-move-right">
-                            <img src={currentItem.src} alt="item" className="w-full h-full object-contain" />
+            <div className="w-[384px] h-[384px] grid grid-cols-8 border-2 border-cyan-500/20 shrink-0">
+                {mazeMap.map((row, y) => row.map((cell, x) => (
+                    <div key={`${y}-${x}`} className="relative bg-slate-800">
+                        <img src={getTileImage(cell)} className="w-full h-full object-cover" alt="tile" />
+                        {robotPos.y === y && robotPos.x === x && (
+                            <img src="/assets/practice/m2/robot-lab.PNG" className="absolute inset-0 w-full h-full p-1 transition-all duration-500"
+                                 style={{ transform: `rotate(${robotPos.dir * 90}deg)` }} alt="robot" />
+                        )}
+                    </div>
+                )))}
+            </div>
+
+            <div className="flex-1 flex flex-col gap-4">
+                <div className="flex justify-between items-center">
+                    <h2 className="text-cyan-400 font-bold uppercase">Алгоритм ({commands.length}/{MAX_COMMANDS})</h2>
+                    <span className="text-cyan-600 text-sm">Кроків: {stepCount}</span>
+                </div>
+
+                <div className="h-[250px] bg-slate-900 border border-dashed border-cyan-500 rounded p-4 overflow-y-auto flex flex-wrap gap-2 content-start">
+                    {commands.map((cmd, i) => (
+                        <button key={i} disabled={isRunning} onClick={() => setCommands(commands.filter((_, idx) => idx !== i))}
+                                className={`${cmd.type === 'loop' ? 'bg-purple-600' : 'bg-cyan-600'} px-3 py-1 rounded text-white text-xs hover:bg-red-600 transition-colors`}>
+                            {cmd.type === 'loop' ? `↺ ${cmd.action} x${cmd.count}` : cmd.type} ✕
+                        </button>
+                    ))}
+                </div>
+
+                <div className="flex gap-2">
+                    <button disabled={isRunning || commands.length >= MAX_COMMANDS} onClick={() => setCommands([...commands, {type: 'Вперед'}])} className="px-4 py-2 bg-cyan-700 text-white rounded disabled:opacity-30">Вперед</button>
+                    <button disabled={isRunning || commands.length >= MAX_COMMANDS} onClick={() => setCommands([...commands, {type: 'Поворот'}])} className="px-4 py-2 bg-cyan-700 text-white rounded disabled:opacity-30">Поворот</button>
+                    <button disabled={isRunning || commands.length >= MAX_COMMANDS} onClick={() => setIsModalOpen(true)} className="px-4 py-2 bg-purple-700 text-white rounded disabled:opacity-30">Цикл</button>
+                    <button disabled={isRunning} onClick={resetMission} className="px-4 py-2 bg-red-900 text-white rounded disabled:opacity-30">Скинути</button>
+                </div>
+                <button disabled={isRunning} onClick={runAlgorithm} className="w-full py-3 bg-green-600 text-white font-bold rounded hover:bg-green-500 disabled:opacity-30">ЗАПУСК</button>
+            </div>
+
+            {isModalOpen && (
+                <div className="absolute inset-0 bg-black/80 flex items-center justify-center rounded-xl z-50">
+                    <div className="bg-slate-800 p-6 rounded-lg border border-purple-500 w-80">
+                        <h3 className="text-white mb-4">Налаштування циклу</h3>
+                        <select className="w-full mb-4 p-2 bg-slate-900 text-white border border-purple-500 rounded" value={loopSettings.action} onChange={(e) => setLoopSettings({...loopSettings, action: e.target.value})}>
+                            <option value="Вперед" className="bg-slate-800">Вперед</option>
+                            <option value="Поворот" className="bg-slate-800">Поворот</option>
+                        </select>
+                        <input type="range" min="1" max="5" value={loopSettings.count} className="w-full mb-6 accent-purple-500" onChange={(e) => setLoopSettings({...loopSettings, count: parseInt(e.target.value)})} />
+                        <div className="flex gap-2">
+                            <button onClick={() => {setCommands([...commands, {type: 'loop', ...loopSettings}]); setIsModalOpen(false);}} className="flex-1 bg-green-600 py-2 text-white rounded">Додати</button>
+                            <button onClick={() => setIsModalOpen(false)} className="flex-1 bg-red-600 py-2 text-white rounded">Скасувати</button>
                         </div>
                     </div>
-
-                    <div className="flex justify-center gap-8 mt-6">
-                        <button onClick={() => handleSort('robot')} className="flex flex-col items-center p-4 w-28 h-28 border-2 border-cyan-500/50 rounded-2xl bg-cyan-950/40 hover:bg-cyan-500/30 hover:scale-105 transition-all text-cyan-400">
-                            <span className="text-4xl mb-1">⚙️</span>
-                            <span className="text-[10px] font-bold uppercase">Роботи</span>
-                        </button>
-                        <button onClick={() => handleSort('power')} className="flex flex-col items-center p-4 w-28 h-28 border-2 border-cyan-500/50 rounded-2xl bg-cyan-950/40 hover:bg-cyan-500/30 hover:scale-105 transition-all text-cyan-400">
-                            <span className="text-4xl mb-1">⚡</span>
-                            <span className="text-[10px] font-bold uppercase">Живлення</span>
-                        </button>
-                        <button onClick={() => handleSort('trash')} className="flex flex-col items-center p-4 w-28 h-28 border-2 border-red-500/50 rounded-2xl bg-red-950/40 hover:bg-red-500/30 hover:scale-105 transition-all text-red-400">
-                            <span className="text-4xl mb-1">🗑️</span>
-                            <span className="text-[10px] font-bold uppercase">Сміття</span>
-                        </button>
-                    </div>
                 </div>
-            ) : (
-                <div className="w-full h-full flex flex-col items-center justify-center bg-slate-900 border border-cyan-500/30 rounded-xl p-8 text-center animate-pulse">
+            )}
+
+            {result && (
+                <div className="absolute inset-0 bg-slate-900 flex flex-col items-center justify-center rounded-xl z-50 p-8 text-center animate-pulse">
                     <img
-                        src="/assets/happy-vivi.PNG"
-                        alt="Happy Vivi"
+                        src={result === 'win' ? "/assets/happy-vivi.PNG" : "/assets/sad-vivi.PNG"}
+                        alt="Vivi"
                         className="w-48 h-48 mb-6 rounded-full border-4 border-cyan-500 shadow-[0_0_20px_rgba(34,211,238,0.5)] animate-bounce"
                     />
-                    <h2 className="text-4xl text-cyan-400 font-bold mb-4">МІСІЮ ВИКОНАНО!</h2>
+                    <h2 className="text-4xl text-cyan-400 font-bold mb-4">
+                        {result === 'win' ? "МІСІЮ ВИКОНАНО!" : "Спробуй ще раз!"}
+                    </h2>
                     <p className="text-white text-lg max-w-sm mb-8">
-                        Молодець! Ти чудово впорався з сортуванням і зробив лабораторію безпечною. Я пишаюся тобою!
+                        {result === 'win' ? "Молодець! Я пишаюся тобою!" : "Підказка: використовуй цикли для економії блоків."}
                     </p>
                     <button
                         onClick={() => window.location.reload()}
@@ -130,4 +172,4 @@ const SortConveyor = () => {
     );
 };
 
-export default SortConveyor;
+export default MazeMission;

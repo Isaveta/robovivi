@@ -1,5 +1,6 @@
 import CyberShield from './CyberShield';
 import SortConveyor from './SortConveyor';
+import MazeLogic from "./MazeLogic.jsx";
 
 const PracticeManager = ({ missionId, onClose }) => {
     // Жодних зайвих console.log або тексту тут не повинно бути!
@@ -8,7 +9,7 @@ const PracticeManager = ({ missionId, onClose }) => {
         case 1:
             return <SortConveyor onClose={onClose} />;
         case 2:
-            return <div className="p-10 text-white text-center">Місія 2: Лабіринт</div>;
+            return <MazeLogic onClose={onClose} />;
         case 3:
             return <div className="p-10 text-white text-center">Місія 3: Сенсори</div>;
         case 4:
