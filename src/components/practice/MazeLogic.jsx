@@ -160,7 +160,7 @@ const MazeMission = ({ onClose }) => {
                             : "Підказка: спробуй згрупувати однакові рухи за допомогою циклів, щоб зекономити блоки!"
                         }
                     </p>
-                    
+
                     <button
                         onClick={onClose}
                         className="px-8 py-3 bg-cyan-600 text-white font-bold rounded-lg hover:bg-cyan-500 transition-all"
