@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { missions, viviQuotes } from '../data/missionsData.jsx';
 import TheoryModal from '../components/TheoryModal.jsx';
 import TestModal from '../components/TestModal.jsx';
@@ -8,6 +9,8 @@ import PracticeManager from '../components/practice/PracticeManager';
 
 const StudentDashboard = () => {
     const navigate = useNavigate();
+    const { userData } = useAuth()
+
     const [viviText, setViviText] = useState(viviQuotes[0]);
     const [openedTask, setOpenedTask] = useState(null);
     const [robotIndex, setRobotIndex] = useState(0);
@@ -73,8 +76,12 @@ const StudentDashboard = () => {
             <header className="h-16 bg-slate-950/80 backdrop-blur-md border-b border-cyan-500/50 flex items-center justify-between px-8 shadow-[0_4px_20px_rgba(34,211,238,0.15)] z-10">
                 <div className="flex items-center gap-4">
                     <div className="w-10 h-10 rounded-full bg-slate-800 border-2 border-cyan-400"></div>
-                    <span className="font-bold text-lg tracking-widest text-white">Прізвище Ім'я</span>
+                    {/* Дані з бази! */}
+                    <span className="font-bold text-lg tracking-widest text-white">
+            {userData ? `${userData.surname} ${userData.name}` : "Завантаження..."}
+        </span>
                 </div>
+
                 <div className="flex items-center gap-8">
                     <div className="flex items-center gap-3 bg-slate-900/50 px-4 py-1.5 rounded-full border border-cyan-500/30">
                         <span className="font-bold text-cyan-400 text-sm">Серія днів</span>
@@ -122,7 +129,6 @@ const StudentDashboard = () => {
                 <div className="flex-[2] flex flex-col gap-6">
                     <div className="flex-[3] bg-slate-950/70 backdrop-blur-md border border-cyan-500/40 rounded-3xl p-6 shadow-[inset_0_0_20px_rgba(34,211,238,0.1)] flex flex-col relative overflow-hidden">
 
-                        {/* Заголовок із кнопкою I */}
                         <div className="flex justify-between items-center mb-4">
                             <div className="flex items-center gap-3">
                                 <h3 className="text-cyan-400 font-bold tracking-widest text-sm uppercase">3D МОДЕЛІ</h3>
@@ -137,7 +143,6 @@ const StudentDashboard = () => {
                                 </button>
                             </div>
 
-                            {/* Кнопки перемикання */}
                             <div className="flex items-center gap-3">
                                 <button onClick={() => {setRobotIndex(prev => prev === 0 ? 1 : 0); setShowInfo(false)}} className="text-cyan-400 hover:text-white text-xl font-bold">←</button>
                                 <span className="text-cyan-200 text-xs font-bold w-32 text-center">{robotsData[robotIndex].name}</span>
@@ -149,7 +154,6 @@ const StudentDashboard = () => {
                         <div className="flex-1 w-full border border-cyan-500/20 rounded-xl bg-slate-900/50 flex items-center justify-center overflow-hidden relative">
                             <RobotModel scene={robotsData[robotIndex].scene} />
 
-                            {/* Інфо блок, що з'являється поверх */}
                             {showInfo && (
                                 <div className="absolute inset-0 z-20 bg-slate-950/95 p-6 flex flex-col justify-center items-center text-center animate-in fade-in duration-300">
                                     <h4 className="text-cyan-400 font-bold mb-3">{robotsData[robotIndex].name}</h4>
@@ -171,22 +175,19 @@ const StudentDashboard = () => {
                 </div>
             </main>
 
-            {/* РЕНДЕР МОДАЛОК ЗАЛЕЖНО ВІД ТИПУ */}
             {openedTask?.type === 'theory' && <TheoryModal openedTask={openedTask} onClose={() => setOpenedTask(null)} />}
             {openedTask?.type === 'test' && <TestModal openedTask={openedTask} onClose={() => setOpenedTask(null)} />}
 
 
-            {/* Менеджер практики */}
             {openedTask?.type === 'practice' && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-6 sm:p-10 bg-slate-950/80 backdrop-blur-sm transition-opacity">
                     <div className="relative w-full max-w-6xl h-[85vh] bg-slate-900 border-2 border-cyan-400 rounded-3xl shadow-[0_0_50px_rgba(34,211,238,0.2)] flex flex-col overflow-hidden">
-                        {/* Тільки заголовок і менеджер! */}
+
                         <div className="flex justify-between items-center px-8 py-5 border-b border-cyan-500/50 bg-slate-950/80">
                             <h2 className="text-2xl font-bold text-white">ПРАКТИКА</h2>
                             <button onClick={() => setOpenedTask(null)} className="text-slate-400 hover:text-cyan-400 text-xl">✕</button>
                         </div>
 
-                        {/* Тут має бути тільки менеджер, без ніяких додаткових div */}
                         <PracticeManager missionId={openedTask.missionId} onClose={() => setOpenedTask(null)} />
                     </div>
                 </div>

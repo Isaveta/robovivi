@@ -1,14 +1,31 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { db } from "../firebase";
+import { doc, setDoc } from "firebase/firestore";
 
 const AdminDashboard = () => {
     const navigate = useNavigate();
+    const { userData } = useAuth();
     const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
     const [inviteCode, setInviteCode] = useState('X7B-9WQ');
 
-    const handleGenerateNewCode = () => {
+    const handleGenerateNewCode = async () => {
         const newCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-        setInviteCode(newCode);
+
+        try {
+            await setDoc(doc(db, "invites", newCode), {
+                code: newCode,
+                teacherId: userData.uid,
+                status: "active",
+                createdAt: new Date().toISOString()
+            });
+            setInviteCode(newCode);
+            alert("Новий код успішно створено в базі!");
+        } catch (error) {
+            console.error("Помилка при створенні коду:", error);
+            alert("Не вдалося створити код.");
+        }
     };
 
     return (
@@ -44,8 +61,10 @@ const AdminDashboard = () => {
                 <div className="flex items-center gap-6">
                     <div className="flex items-center gap-4">
                         <div className="text-right">
-                            <div className="font-bold text-white text-sm">Вчитель</div>
-                            <div className="text-xs text-cyan-500">Адміністратор</div>
+                            <div className="font-bold text-white text-sm">
+                                {userData ? `${userData.surname} ${userData.name}` : "Завантаження..."}
+                            </div>
+                            <div className="text-xs text-cyan-500">Вчитель</div>
                         </div>
                         <div className="w-12 h-12 rounded-full bg-slate-800 border-2 border-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.3)]"></div>
                     </div>
