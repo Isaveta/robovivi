@@ -64,7 +64,7 @@ const CyberShield = ({ onClose }) => {
 
             <div className="bg-cyan-950/20 p-4 mb-4 border border-cyan-500/30">
                 <h2 className="text-white text-sm mb-1 underline uppercase">Завдання місії:</h2>
-                <p className="text-sm opacity-80">Вітаю, оперативнику. Наша мета — повернути контроль над системою. Використовуй панель підказок справа для дешифрування.</p>
+                <p className="text-sm opacity-80">Вітаю, друже. Наша мета — повернути контроль над системою. Використовуй панель підказок справа для дешифрування.</p>
             </div>
 
             <div className="flex-1 grid grid-cols-2 gap-4">
