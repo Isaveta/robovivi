@@ -17,7 +17,7 @@ const AuthScreen = () => {
     const [surname, setSurname] = useState('');
     const [inviteCode, setInviteCode] = useState('');
     const [error, setError] = useState('');
-    
+
     const getErrorMessage = (code) => {
         switch (code) {
             case 'auth/user-not-found': return 'Користувача з такою поштою не знайдено.';

@@ -60,7 +60,7 @@ const StudentDashboard = () => {
                 onClick={() => setOpenedTask({
                     mission: missionTitle,
                     type: type,
-                    missionId: mission.id // ПЕРЕДАЄМО ID МІСІЇ
+                    missionId: mission.id
                 })}
                 className={`w-16 h-16 flex items-center justify-center rotate-45 border-2 rounded-xl transition-all ${borderColor} ${bgColor} ${shadow} hover:scale-110 cursor-pointer`}
             >

@@ -1,6 +1,7 @@
 import CyberShield from './CyberShield';
 import SortConveyor from './SortConveyor';
 import MazeLogic from "./MazeLogic.jsx";
+import SensorPicker from "./SensorPicker.jsx";
 
 const PracticeManager = ({ missionId, onClose }) => {
     // Жодних зайвих console.log або тексту тут не повинно бути!
@@ -11,7 +12,7 @@ const PracticeManager = ({ missionId, onClose }) => {
         case 2:
             return <MazeLogic onClose={onClose} />;
         case 3:
-            return <div className="p-10 text-white text-center">Місія 3: Сенсори</div>;
+            return <SensorPicker onClose={onClose} />;
         case 4:
             return <CyberShield onClose={onClose} />;
         default:
