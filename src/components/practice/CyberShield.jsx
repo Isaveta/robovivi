@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { unlockNextStep } from '../../utils/progressUtils';
+import { useAuth } from '../../context/AuthContext';
 
 // Генератор випадкової таблиці
 const generateCipherTable = () => {
@@ -36,13 +38,13 @@ const stages = [
 ];
 
 const CyberShield = ({ onClose }) => {
+    const { user } = useAuth();
     const [currentStage, setCurrentStage] = useState(0);
     const [input, setInput] = useState('');
     const [feedback, setFeedback] = useState('idle');
 
     const handleInputChange = (e) => {
         const val = e.target.value.toUpperCase();
-        // Залишаємо тільки літери та обмежуємо довжину відповіді довжиною правильної відповіді
         const onlyLetters = val.replace(/[^A-Z]/g, '');
         if (onlyLetters.length <= stages[currentStage].answer.length) {
             setInput(onlyLetters);
@@ -53,16 +55,20 @@ const CyberShield = ({ onClose }) => {
         if (e.key === 'Enter') handleCheck();
     };
 
-    const handleCheck = () => {
+    const handleCheck = async () => {
         if (input === stages[currentStage].answer) {
             setFeedback('correct');
-            setTimeout(() => {
+
+            // Затримка перед переходом
+            setTimeout(async () => {
                 if (currentStage < stages.length - 1) {
                     setCurrentStage(prev => prev + 1);
                     setInput('');
                     setFeedback('idle');
                 } else {
-                    alert("СИСТЕМУ ВІДНОВЛЕНО!");
+                    // Фіналізація місії 4
+                    await unlockNextStep(user.uid, 4, 'practice');
+                    alert("СИСТЕМУ ВІДНОВЛЕНО! Я ПИШАЮСЯ ТОБОЮ");
                     onClose();
                 }
             }, 1000);

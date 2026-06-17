@@ -1,7 +1,11 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { mission1Test, mission2Test, mission3Test, mission4Test } from '../data/missionsData';
+import { unlockNextStep } from '../utils/progressUtils';
+import { useAuth } from '../context/AuthContext';
 
 const TestModal = ({ openedTask, onClose }) => {
+    const { user } = useAuth();
+
     // Вибираємо масив питань та перемішуємо варіанти
     const rawData = useMemo(() => {
         let data = [];
@@ -25,6 +29,26 @@ const TestModal = ({ openedTask, onClose }) => {
     const [score, setScore] = useState(0);
     const [isFinished, setIsFinished] = useState(false);
     const [feedback, setFeedback] = useState(null);
+
+    // при завершенні тесту оновлюємо базу, якщо тест складено
+    useEffect(() => {
+        const updateProgress = async () => {
+            if (isFinished) {
+                const percentage = (score / rawData.length) * 100;
+                const isPassed = percentage >= 33;
+
+                if (isPassed) {
+                    try {
+                        await unlockNextStep(user.uid, openedTask.missionId, 'test');
+                        console.log("Практику розблоковано!");
+                    } catch (error) {
+                        console.error("Помилка при розблокуванні практики:", error);
+                    }
+                }
+            }
+        };
+        updateProgress();
+    }, [isFinished, score, rawData.length, user.uid, openedTask.missionId]);
 
     const handleAnswer = (index) => {
         if (feedback !== null) return;

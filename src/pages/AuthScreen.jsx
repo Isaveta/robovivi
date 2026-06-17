@@ -24,10 +24,6 @@ const AuthScreen = () => {
             case 'auth/wrong-password': return 'Невірний пароль.';
             case 'auth/email-already-in-use': return 'Ця пошта вже використовується.';
             case 'auth/weak-password': return 'Пароль занадто слабкий (мінімум 6 символів).';
-            case 'auth/invalid-email': return 'Невірний формат електронної пошти.';
-            case 'auth/too-many-requests': return 'Забагато спроб входу, спробуйте пізніше.';
-            case 'auth/network-request-failed': return 'Помилка мережі, перевірте з’єднання.';
-            case 'auth/user-disabled': return 'Ваш акаунт було заблоковано.';
             default: return 'Сталася помилка, спробуйте ще раз.';
         }
     };
@@ -36,11 +32,10 @@ const AuthScreen = () => {
         e.preventDefault();
         setError('');
 
-        if (mode === 'register' && role === 'student') {
-            if (!inviteCode || inviteCode.trim() === '') {
-                setError("Будь ласка, введіть код запрошення, щоб приєднатися до класу!");
-                return;
-            }
+        // Перевірка коду запрошення для студента
+        if (mode === 'register' && role === 'student' && !inviteCode) {
+            setError("Будь ласка, введіть код запрошення!");
+            return;
         }
 
         try {
@@ -48,14 +43,25 @@ const AuthScreen = () => {
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
 
+                // 1. Зберігаємо дані користувача
                 await setDoc(doc(db, "users", user.uid), {
                     uid: user.uid,
                     name: name,
                     surname: surname,
                     email: email,
                     role: role,
-                    inviteCode: role === 'student' ? inviteCode : null,
+                    inviteCode: inviteCode,
                     createdAt: new Date().toISOString()
+                });
+
+                // 2. Ініціалізуємо прогрес: відкрита тільки теорія першої місії
+                await setDoc(doc(db, "userProgress", user.uid), {
+                    missions: {
+                        1: { theory: "active", test: "locked", practice: "locked" },
+                        2: { theory: "locked", test: "locked", practice: "locked" },
+                        3: { theory: "locked", test: "locked", practice: "locked" },
+                        4: { theory: "locked", test: "locked", practice: "locked" }
+                    }
                 });
 
                 navigate(role === 'student' ? '/student' : '/admin');
@@ -64,7 +70,6 @@ const AuthScreen = () => {
                 navigate(role === 'student' ? '/student' : '/admin');
             }
         } catch (err) {
-            // Використовуємо наш перекладач для виведення зрозумілого тексту
             setError(getErrorMessage(err.code));
         }
     };
@@ -83,16 +88,15 @@ const AuthScreen = () => {
                 <form onSubmit={handleSubmit} className="flex flex-col gap-5">
                     {mode === 'register' && (
                         <>
-                            <input type="text" placeholder="Напишіть як вас звати..." value={name} onChange={(e) => setName(e.target.value)} className="w-full bg-slate-900/50 border border-cyan-500/50 rounded-xl px-5 py-4 text-cyan-100 outline-none focus:border-cyan-300" />
-                            <input type="text" placeholder="Напишіть яке у вас прізвище..." value={surname} onChange={(e) => setSurname(e.target.value)} className="w-full bg-slate-900/50 border border-cyan-500/50 rounded-xl px-5 py-4 text-cyan-100 outline-none focus:border-cyan-300" />
+                            <input type="text" placeholder="Ім'я" value={name} onChange={(e) => setName(e.target.value)} className="w-full bg-slate-900/50 border border-cyan-500/50 rounded-xl px-5 py-4 text-cyan-100 outline-none" required />
+                            <input type="text" placeholder="Прізвище" value={surname} onChange={(e) => setSurname(e.target.value)} className="w-full bg-slate-900/50 border border-cyan-500/50 rounded-xl px-5 py-4 text-cyan-100 outline-none" required />
                         </>
                     )}
-
-                    <input type="email" placeholder="Введіть вашу пошту" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-slate-900/50 border border-cyan-500/50 rounded-xl px-5 py-4 text-cyan-100 outline-none focus:border-cyan-300" required />
-                    <input type="password" placeholder="Введіть пароль..." value={password} onChange={(e) => setPassword(e.target.value)} className="w-full bg-slate-900/50 border border-cyan-500/50 rounded-xl px-5 py-4 text-cyan-100 outline-none focus:border-cyan-300" required />
+                    <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-slate-900/50 border border-cyan-500/50 rounded-xl px-5 py-4 text-cyan-100 outline-none" required />
+                    <input type="password" placeholder="Пароль" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full bg-slate-900/50 border border-cyan-500/50 rounded-xl px-5 py-4 text-cyan-100 outline-none" required />
 
                     {mode === 'register' && role === 'student' && (
-                        <input type="text" placeholder="Код запрошення..." value={inviteCode} onChange={(e) => setInviteCode(e.target.value)} className="w-full bg-slate-900/50 border border-cyan-500/50 rounded-xl px-5 py-4 text-cyan-100 outline-none focus:border-cyan-300" />
+                        <input type="text" placeholder="Код запрошення..." value={inviteCode} onChange={(e) => setInviteCode(e.target.value)} className="w-full bg-slate-900/50 border border-cyan-500/50 rounded-xl px-5 py-4 text-cyan-100 outline-none" />
                     )}
 
                     <button type="submit" className="mt-6 bg-cyan-100 text-cyan-950 font-bold text-lg rounded-full py-4 shadow-[0_0_15px_rgba(207,250,254,0.5)] hover:bg-white transition-all">

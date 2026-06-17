@@ -1,6 +1,9 @@
 import { useState } from 'react';
+import { unlockNextStep } from '../../utils/progressUtils';
+import { useAuth } from '../../context/AuthContext';
 
 const MazeMission = ({ onClose }) => {
+    const { user } = useAuth();
     const [mazeMap] = useState([
         [3, 0, 1, 0, 0, 0, 0, 0],
         [0, 0, 1, 0, 1, 1, 1, 0],
@@ -162,7 +165,10 @@ const MazeMission = ({ onClose }) => {
                     </p>
 
                     <button
-                        onClick={onClose}
+                        onClick={async () => {
+                            await unlockNextStep(user.uid, 2, 'practice');
+                            onClose();
+                        }}
                         className="px-8 py-3 bg-cyan-600 text-white font-bold rounded-lg hover:bg-cyan-500 transition-all"
                     >
                         ЗАВЕРШИТИ ПРАКТИКУ

@@ -1,9 +1,12 @@
 import { useState } from 'react';
+import { unlockNextStep } from '../../utils/progressUtils';
+import { useAuth } from '../../context/AuthContext';
 
 const SortConveyor = ({ onClose }) => {
     const [step, setStep] = useState('intro');
     const [found, setFound] = useState([]);
     const [score, setScore] = useState(0);
+    const { user } = useAuth();
 
     const conveyorItems = [
         { type: 'robot', src: '/assets/practice/m12/obj-micro.PNG' },
@@ -27,7 +30,7 @@ const SortConveyor = ({ onClose }) => {
     const handleSort = (selectedType) => {
         if (selectedType === currentItem.type) {
             setScore(prev => prev + 1);
-            if (score >= 4) { // 5 правильних відповідей (0-4)
+            if (score >= 5) { // 5 правильних відповідей
                 setStep('complete');
             } else {
                 const randomItem = conveyorItems[Math.floor(Math.random() * conveyorItems.length)];
@@ -119,7 +122,10 @@ const SortConveyor = ({ onClose }) => {
                         Молодець! Ти чудово впорався з сортуванням і зробив лабораторію безпечною. Я пишаюся тобою!
                     </p>
                     <button
-                        onClick={onClose}
+                        onClick={async () => {
+                            await unlockNextStep(user.uid, 1, 'practice');
+                            onClose();
+                        }}
                         className="px-8 py-3 bg-cyan-600 text-white font-bold rounded-lg hover:bg-cyan-500 transition-all"
                     >
                         ЗАВЕРШИТИ ПРАКТИКУ

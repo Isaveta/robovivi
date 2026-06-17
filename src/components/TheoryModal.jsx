@@ -1,15 +1,16 @@
 import { useState } from 'react';
 import { mission1Theory, mission2Theory, mission3Theory, mission4Theory } from '../data/missionsData.jsx';
+import { unlockNextStep } from '../utils/progressUtils'; // Твоя нова утиліта
+import { useAuth } from '../context/AuthContext'; // Для отримання ID користувача
 
 const TheoryModal = ({ openedTask, onClose }) => {
-    // Вибираємо масив залежно від назви місії
-    const getTheoryData = () => {
+    const { user } = useAuth(); // Отримуємо доступ до користувача
 
+    const getTheoryData = () => {
         if (openedTask.mission.includes('МІСІЯ 1')) return mission1Theory;
         if (openedTask.mission.includes('МІСІЯ 2')) return mission2Theory;
         if (openedTask.mission.includes('МІСІЯ 3')) return mission3Theory;
         if (openedTask.mission.includes('МІСІЯ 4')) return mission4Theory;
-
         return [];
     };
 
@@ -44,7 +45,7 @@ const TheoryModal = ({ openedTask, onClose }) => {
             if (ukVoice) {
                 utterance.voice = ukVoice;
             } else if (!voiceWarningShown) {
-                alert("Увага: На вашому пристрої не знайдено українського голосового пакету.\n\nБраузер спробує прочитати текст іншими доступними голосами, тому озвучка може звучати з сильним акцентом. Це нормально!");
+                alert("Увага: На вашому пристрої не знайдено українського голосового пакету.");
                 setVoiceWarningShown(true);
             }
 
@@ -65,8 +66,19 @@ const TheoryModal = ({ openedTask, onClose }) => {
         });
     };
 
-    const handleClose = () => {
+    const handleClose = async () => {
         stopAllAudio();
+
+        // Якщо учень дійшов до останньої сторінки — розблоковуємо тест
+        if (currentTheoryPage === currentTheory.length - 1) {
+            try {
+                await unlockNextStep(user.uid, openedTask.missionId, 'theory');
+                console.log("Тест успішно розблоковано!");
+            } catch (error) {
+                console.error("Помилка при оновленні прогресу:", error);
+            }
+        }
+
         onClose();
     };
 
