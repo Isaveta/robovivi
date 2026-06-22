@@ -7,16 +7,26 @@ import TheoryModal from '../components/TheoryModal.jsx';
 import TestModal from '../components/TestModal.jsx';
 import RobotModel from '../components/RobotModel.jsx';
 import PracticeManager from '../components/practice/PracticeManager';
+import { updateStreak } from '../utils/progressUtils';
+import AvatarSelector from '../components/AvatarSelector';
+
 
 const StudentDashboard = () => {
     const navigate = useNavigate();
     const { userData, user } = useAuth();
     const progress = useProgress(user?.uid);
+    useEffect(() => {
+        if (user?.uid) {
+            updateStreak(user.uid);
+        }
+    }, [user]);
 
     const [viviText, setViviText] = useState(viviQuotes[0]);
     const [openedTask, setOpenedTask] = useState(null);
     const [robotIndex, setRobotIndex] = useState(0);
     const [showInfo, setShowInfo] = useState(false);
+    const [showAvatarPicker, setShowAvatarPicker] = useState(false);
+
 
     const robotsData = [
         {
@@ -77,7 +87,7 @@ const StudentDashboard = () => {
         return (
             <div
                 onClick={() => {
-                    // Якщо заблоковано — нічого не робимо (або показуємо попередження)
+                    // Якщо заблоковано — нічого не робимо
                     if (isLocked) {
                         alert("Цей етап ще заблоковано! Виконай попередні завдання.");
                         return;
@@ -101,17 +111,37 @@ const StudentDashboard = () => {
 
             <header className="h-16 bg-slate-950/80 backdrop-blur-md border-b border-cyan-500/50 flex items-center justify-between px-8 shadow-[0_4px_20px_rgba(34,211,238,0.15)] z-10">
                 <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full bg-slate-800 border-2 border-cyan-400"></div>
+                    <div
+                        className="w-10 h-10 rounded-full bg-slate-800 border-2 border-cyan-400 overflow-hidden cursor-pointer"
+                        onClick={() => {
+                            // Якщо фото ще немає — відкриваємо вибір, якщо є — нічого не робимо
+                            if (!userData?.photoURL) {
+                                setShowAvatarPicker(true);
+                            }
+                        }}
+                    >
+                        <img
+                            src={userData?.photoURL || "/assets/default-avatar.PNG"}
+                            alt="Avatar"
+                            className="w-full h-full object-cover"
+                        />
+                    </div>
                     <span className="font-bold text-lg tracking-widest text-white">
-                        {userData ? `${userData.surname} ${userData.name}` : "Завантаження..."}
-                    </span>
+            {userData ? `${userData.surname} ${userData.name}` : "Завантаження..."}
+        </span>
                 </div>
+
                 <div className="flex items-center gap-8">
                     <div className="flex items-center gap-3 bg-slate-900/50 px-4 py-1.5 rounded-full border border-cyan-500/30">
                         <span className="font-bold text-cyan-400 text-sm">Серія днів</span>
-                        <div className="w-16 h-4 bg-white rounded-sm"></div>
+                        <span className="font-bold text-white text-sm">{userData?.streak || 0} 🔥</span>
                     </div>
-                    <button onClick={() => navigate('/')} className="hover:text-cyan-400 transition-colors text-sm underline opacity-70 hover:opacity-100">Вийти</button>
+                    <button
+                        onClick={() => navigate('/')}
+                        className="hover:text-cyan-400 transition-colors text-sm underline opacity-70 hover:opacity-100"
+                    >
+                        Вийти
+                    </button>
                 </div>
             </header>
 
@@ -208,6 +238,14 @@ const StudentDashboard = () => {
                         </div>
                     </div>
                 </div>
+            )}
+            {showAvatarPicker && (
+                <AvatarSelector
+                    userId={user?.uid}
+                    currentPhoto={userData?.photoURL}
+                    onClose={() => setShowAvatarPicker(false)}
+                    onUpdate={() => setShowAvatarPicker(false)}
+                />
             )}
         </div>
     );
